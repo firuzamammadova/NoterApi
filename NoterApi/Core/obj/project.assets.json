@@ -14,11 +14,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\YOGA\\Desktop\\flutterProject\\NoterApi\\Core\\Core.csproj",
+      "projectUniqueName": "C:\\Users\\YOGA\\Desktop\\flutterProject\\Noter\\NoterApi\\Core\\Core.csproj",
       "projectName": "Core",
-      "projectPath": "C:\\Users\\YOGA\\Desktop\\flutterProject\\NoterApi\\Core\\Core.csproj",
+      "projectPath": "C:\\Users\\YOGA\\Desktop\\flutterProject\\Noter\\NoterApi\\Core\\Core.csproj",
       "packagesPath": "C:\\Users\\YOGA\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\YOGA\\Desktop\\flutterProject\\NoterApi\\Core\\obj\\",
+      "outputPath": "C:\\Users\\YOGA\\Desktop\\flutterProject\\Noter\\NoterApi\\Core\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

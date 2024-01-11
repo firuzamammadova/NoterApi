@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "G79f04aZt/4hNXdQKCxAhTmzrOsK9MksyegK2Cl/b3ZyGuLDeThEfS3P3R4hrD1kB1tO2W5el1poWFcaYWMm4g==",
+  "dgSpecHash": "87ZDvyb0lY9aVcrz5TxOt7XFWQMw/UTNtU9nd9gk5OB5E1HAcoim5qdOpF1Zd4rSqSsWPXBIO9Kt0j57drhc4g==",
   "success": true,
-  "projectFilePath": "C:\\Users\\YOGA\\Desktop\\flutterProject\\NoterApi\\ToDoPlanner\\NoterApi.csproj",
+  "projectFilePath": "C:\\Users\\YOGA\\Desktop\\flutterProject\\Noter\\NoterApi\\ToDoPlanner\\NoterApi.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\YOGA\\.nuget\\packages\\dapper\\2.1.24\\dapper.2.1.24.nupkg.sha512",
     "C:\\Users\\YOGA\\.nuget\\packages\\fluentmigrator\\3.3.2\\fluentmigrator.3.3.2.nupkg.sha512",

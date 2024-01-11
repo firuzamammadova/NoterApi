@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "ouxxj9HaypiSpLLCrK6qaguYueRepPtlk4EV/qmwEeCuZ9/CM9rlr43cMLudaej4qQBGQiLUZhavgrM3/N+ZhA==",
+  "dgSpecHash": "7qvZYi52hxSkW+3vigMQIdSyqDY/Wk5hJnIdFNXsU+o7I2f3u4YDQ9/2JWGJB6dDHgw+Ab2+ois0vnTC8UNq/A==",
   "success": true,
-  "projectFilePath": "C:\\Users\\YOGA\\Desktop\\flutterProject\\NoterApi\\Service\\Service.csproj",
+  "projectFilePath": "C:\\Users\\YOGA\\Desktop\\flutterProject\\Noter\\NoterApi\\Service\\Service.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\YOGA\\.nuget\\packages\\dapper\\2.1.24\\dapper.2.1.24.nupkg.sha512",
     "C:\\Users\\YOGA\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\8.0.0\\microsoft.extensions.configuration.abstractions.8.0.0.nupkg.sha512",
