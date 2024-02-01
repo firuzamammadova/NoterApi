@@ -57,6 +57,13 @@ namespace NoterApi.Controllers
             var result = await _service.AddAsync(item);
             return Ok(result); ;
         }
+        [HttpPost]
+        [Route("[action]")]
+        public  IActionResult SaveNote([FromBody] String item)
+        {
+           
+            return Ok(); ;
+        }
 
         [HttpDelete]
         [Route("[action]")]
