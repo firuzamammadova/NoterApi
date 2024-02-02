@@ -25,22 +25,27 @@ namespace Service.Services
     }
     public class RecordFileService : IRecordFileService
     {
+        private readonly IFileTypeRepository _typeRepository;
+
         private readonly IRecordFileRepository _repository;
         private readonly IUnitOfWork _unitOfWork;
 
-        public RecordFileService(IRecordFileRepository RecordFileRepository, IUnitOfWork unitOfWork)
+        public RecordFileService(IFileTypeRepository typeRepository, IRecordFileRepository repository, IUnitOfWork unitOfWork)
         {
-            _repository = RecordFileRepository;
+            _typeRepository = typeRepository;
+            _repository = repository;
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<Guid> AddAsync(RecordFile RecordFile)
+        public async Task<Guid> AddAsync(RecordFile recordFile)
         {
             await using var transaction = _unitOfWork.BeginTransaction();
 
             try
             {
-                var result = await _repository.AddAsync(RecordFile);
+                var typeId = await _typeRepository.GetIdByType(recordFile.Type);
+                recordFile.TypeId = typeId;
+                var result = await _repository.AddAsync(recordFile);
                 _unitOfWork.SaveChanges();
                 return result;
             }
@@ -84,7 +89,7 @@ namespace Service.Services
             try
             {
                 var result = await _repository.GetAllAsync();
-                var ancestorFolders = result.Where(x => x.Type == FileTypeEnum.Folder && x.ParentId==null);
+                var ancestorFolders = result.Where(x => x.Type == FileTypeEnum.Folder && x.ParentId == null);
                 return ancestorFolders;
             }
             catch (Exception e)
@@ -92,13 +97,13 @@ namespace Service.Services
                 throw e;
             }
         }
-        public async Task<IEnumerable<RecordFile>> GetChildrenOfFolder( Guid parentId)
+        public async Task<IEnumerable<RecordFile>> GetChildrenOfFolder(Guid parentId)
         {
             try
             {
-            var result = await _repository.GetAllAsync();
-            var childrenOfFolder=result.Where(x=>x.ParentId==parentId);
-            return childrenOfFolder;
+                var result = await _repository.GetAllAsync();
+                var childrenOfFolder = result.Where(x => x.ParentId == parentId);
+                return childrenOfFolder;
 
             }
             catch (Exception e)

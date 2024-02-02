@@ -12,6 +12,8 @@ namespace Repository.CQRS.Queries
     public interface IFileTypeQuery
     {
         public Task<FileType> GetById(string id);
+        public Task<Guid> GetIdByType(FileTypeEnum type);
+
         Task<IEnumerable<FileType>> GetAllAsync();
 
 
@@ -28,6 +30,8 @@ namespace Repository.CQRS.Queries
                                              WHERE C.DeleteStatus = 0";
 
         private readonly string _getByIdSql = @$"SELECT * FROM dbo.FileTypes WHERE Id=@id";
+        private readonly string _getIdByTypeSql = @$"SELECT FT.Id FROM dbo.FileTypes FT WHERE FT.DeleteStatus=0 AND FT.Type=@type ";
+
 
         public FileTypeQuery(IUnitOfWork unitOfWork)
         {
@@ -67,5 +71,23 @@ namespace Repository.CQRS.Queries
             }
         }
 
+        public async Task<Guid> GetIdByType(FileTypeEnum type)
+        {
+            try
+            {
+                var parameters = new
+                {
+                    type = (int)type
+                };
+                var result = await _unitOfWork.GetConnection()
+                    .QueryFirstOrDefaultAsync<Guid>(_getIdByTypeSql, parameters, _unitOfWork.GetTransaction());
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
+        }
     }
 }

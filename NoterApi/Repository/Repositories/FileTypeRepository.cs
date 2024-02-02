@@ -14,6 +14,8 @@ namespace Repository.Repositories
     {
         public Task<FileType> GetById(string id);
         Task<IEnumerable<FileType>> GetAllAsync();
+        public Task<Guid> GetIdByType(FileTypeEnum type);
+
 
         public Task<Guid> AddAsync(FileType item);
         Task<bool> DeleteAsync(Guid id);
@@ -54,6 +56,11 @@ namespace Repository.Repositories
         {
              await _command.UpdateAsync(item);
             return;
+        }
+
+        public async Task<Guid> GetIdByType(FileTypeEnum type)
+        {
+            return await _query.GetIdByType(type);
         }
     }
 }
