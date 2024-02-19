@@ -14,10 +14,13 @@ namespace Repository.Repositories
     {
         public Task<RecordFile> GetById(string id);
         Task<IEnumerable<RecordFile>> GetAllAsync();
+        Task<IEnumerable<RecordFile>> GoBackGetChildren(string id);
 
         public Task<Guid> AddAsync(RecordFile item);
         Task<bool> DeleteAsync(Guid id);
         Task UpdateAsync(RecordFile item);
+        Task AddContext(RecordFile item);
+
     }
     public class RecordFileRepository : IRecordFileRepository
     {
@@ -54,6 +57,17 @@ namespace Repository.Repositories
         {
             await _command.UpdateAsync(item);
             return;
+        }
+
+        public async Task AddContext(RecordFile item)
+        {
+            await _command.AddContext(item);
+            return;
+        }
+
+        public async Task<IEnumerable<RecordFile>> GoBackGetChildren(string id)
+        {
+            return await _query.GoBackGetChildren(id);
         }
     }
 }

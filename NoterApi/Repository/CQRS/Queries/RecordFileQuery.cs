@@ -13,6 +13,8 @@ namespace Repository.CQRS.Queries
     {
         public Task<RecordFile> GetById(string id);
         Task<IEnumerable<RecordFile>> GetAllAsync();
+        Task<IEnumerable<RecordFile>> GoBackGetChildren(string id);
+
     }
 
     public class RecordFileQuery : IRecordFileQuery
@@ -25,6 +27,11 @@ namespace Repository.CQRS.Queries
                                                WHERE C.DeleteStatus = 0";
 
         private readonly string _getByIdSql = @$"SELECT * FROM dbo.RecordFiles WHERE Id=@id";
+
+        private readonly string _goBackGetChildrenSql = @$"SELECT * FROM RecordFiles 
+                                                           WHERE ParentId=(SELECT TOP 1 ParentId FROM RecordFiles 
+                                                           WHERE Id=@id) AND DeleteStatus=0";
+
 
         public RecordFileQuery(IUnitOfWork unitOfWork)
         {
@@ -64,5 +71,22 @@ namespace Repository.CQRS.Queries
             }
         }
 
+        public async Task<IEnumerable<RecordFile>> GoBackGetChildren(string id)
+        {
+            try
+            {
+                var parameters = new
+                {
+                    id
+                };
+                var result = await _unitOfWork.GetConnection()
+                    .QueryAsync<RecordFile>(_goBackGetChildrenSql, parameters, _unitOfWork.GetTransaction());
+                return result.ToList();
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
     }
 }

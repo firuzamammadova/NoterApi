@@ -17,11 +17,14 @@ namespace Service.Services
         Task<IEnumerable<RecordFile>> GetAllAsync();
         Task<IEnumerable<RecordFile>> GetAncestorFolders();
         Task<IEnumerable<RecordFile>> GetChildrenOfFolder(Guid parentId);
+        Task<IEnumerable<RecordFile>> GoBackGetChildren(string id);
 
 
         public Task<Guid> AddAsync(RecordFile RecordFile);
         Task<bool> DeleteAsync(Guid id);
         Task UpdateAsync(RecordFile item);
+        Task AddContext(RecordFile item);
+
     }
     public class RecordFileService : IRecordFileService
     {
@@ -140,6 +143,40 @@ namespace Service.Services
             catch (Exception e)
             {
                 transaction.Rollback();
+                throw e;
+            }
+        }
+
+        public async Task AddContext(RecordFile item)
+        {
+            await using var transaction = _unitOfWork.BeginTransaction();
+
+            try
+            {
+                await _repository.AddContext(item);
+                _unitOfWork.SaveChanges();
+                return;
+            }
+            catch (Exception e)
+            {
+                transaction.Rollback();
+                throw e;
+            }
+        }
+
+        public async Task<IEnumerable<RecordFile>> GoBackGetChildren(string id)
+        {
+            try
+            {
+                var result = await _repository.GoBackGetChildren(id);
+                if (result.Count() == 0)
+                {
+                   result=await GetAncestorFolders();
+                }
+                return result;
+            }
+            catch (Exception e)
+            {
                 throw e;
             }
         }

@@ -43,10 +43,19 @@ namespace NoterApi.Controllers
         }
         [HttpGet]
         [Route("[action]")]
-        public async Task<IActionResult> GetChildrenOfFolder([FromQuery] Guid parentId)
+        public async Task<IActionResult> GetChildrenOfFolder([FromQuery] string parentId)
         {
 
-            var result = await _service.GetChildrenOfFolder(parentId);
+            var result = await _service.GetChildrenOfFolder(new Guid(parentId));
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("[action]")]
+        public async Task<IActionResult> GoBackGetChildren([FromQuery] string parentId)
+        {
+
+            var result = await _service.GoBackGetChildren(parentId);
             return Ok(result);
         }
 
@@ -59,17 +68,23 @@ namespace NoterApi.Controllers
         }
         [HttpPost]
         [Route("[action]")]
-        public  IActionResult SaveNote([FromBody] String item)
+        public  IActionResult SaveNote([FromBody] Object item)
         {
-           
+           string a =item.ToString();
             return Ok(); ;
         }
-
+        [HttpPut]
+        [Route("[action]")]
+        public async Task<IActionResult> AddContextAsync([FromBody] RecordFile item)
+        {
+            await _service.AddContext(item);
+            return Ok(); ;
+        }
         [HttpDelete]
         [Route("[action]")]
-        public async Task<IActionResult> DeleteAsync([FromQuery] Guid id)
+        public async Task<IActionResult> DeleteAsync([FromQuery] string id)
         {
-            await _service.DeleteAsync(id);
+            await _service.DeleteAsync(new Guid(id));
             return Ok(); ;
         }
 

@@ -29,7 +29,7 @@ namespace Repository.CQRS.Queries
         private readonly string _getAllSql = @"SELECT C.*  from dbo.FileTypes C
                                              WHERE C.DeleteStatus = 0";
 
-        private readonly string _getByIdSql = @$"SELECT * FROM dbo.FileTypes WHERE Id=@id";
+        private readonly string _getByIdSql = @$"SELECT * FROM dbo.FileTypes WHERE Id=@id AND DeleteStatus=0";
         private readonly string _getIdByTypeSql = @$"SELECT FT.Id FROM dbo.FileTypes FT WHERE FT.DeleteStatus=0 AND FT.Type=@type ";
 
 

@@ -19,6 +19,7 @@ namespace Core.Models
         Folder,
         Note,
         List,
+        ToDo,
         Empty,
         Test
     }
