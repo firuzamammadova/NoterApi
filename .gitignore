@@ -24,3 +24,8 @@ package-lock.json~25b9c4641bb318d5a1d8f7eb9a801cace488c3fe
 *.pdf
 *.json
 *.suo
+NoterApi/Core/bin/Debug/net8.0/Core.dll
+*.dll
+*.exe
+*.pdb
+*.exe
