@@ -33,6 +33,24 @@ namespace NoterApi.Controllers
             var result = await _service.GetAllAsync();
             return Ok(result);
         }
+
+        [HttpGet]
+        [Route("[action]")]
+        public async Task<IActionResult> GetAllStarred()
+        {
+
+            var result = await _service.GetAllStarredAsync();
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("[action]")]
+        public async Task<IActionResult> GetRecentFiles()
+        {
+
+            var result = await _service.GetRecentFilesAsync();
+            return Ok(result);
+        }
         [HttpGet]
         [Route("[action]")]
         public async Task<IActionResult> GetAncestorFolders()
@@ -57,6 +75,22 @@ namespace NoterApi.Controllers
 
             var result = await _service.GoBackGetChildren(parentId);
             return Ok(result);
+        }
+        [HttpGet]
+        [Route("[action]")]
+        public async Task<IActionResult> ToggleStarredOfFile([FromQuery] string id)
+        {
+
+            await _service.ToggleStarFile(id);
+            return Ok();
+        }
+        [HttpGet]
+        [Route("[action]")]
+        public async Task<IActionResult> UpdateLastOpenedDate([FromQuery] string id)
+        {
+
+            await _service.UpdateLastOpenedDate(id);
+            return Ok();
         }
 
         [HttpPost]

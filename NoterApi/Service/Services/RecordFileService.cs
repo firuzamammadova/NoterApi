@@ -18,12 +18,18 @@ namespace Service.Services
         Task<IEnumerable<RecordFile>> GetAncestorFolders();
         Task<IEnumerable<RecordFile>> GetChildrenOfFolder(Guid parentId);
         Task<IEnumerable<RecordFile>> GoBackGetChildren(string id);
+        Task<IEnumerable<RecordFile>> GetAllStarredAsync();
 
+        Task<IEnumerable<RecordFile>> GetRecentFilesAsync();
 
         public Task<Guid> AddAsync(RecordFile RecordFile);
         Task<bool> DeleteAsync(Guid id);
         Task UpdateAsync(RecordFile item);
         Task AddContext(RecordFile item);
+
+
+        Task UpdateLastOpenedDate(string id);
+        Task ToggleStarFile(string id);
 
     }
     public class RecordFileService : IRecordFileService
@@ -173,6 +179,42 @@ namespace Service.Services
                 {
                    result=await GetAncestorFolders();
                 }
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        public async Task UpdateLastOpenedDate(string id)
+        {
+            await _repository.UpdateLastOpenedDate(id);
+        }
+
+        public async Task ToggleStarFile(string id)
+        {
+           await _repository.ToggleStarFile(id);
+        }
+
+        public async Task<IEnumerable<RecordFile>> GetAllStarredAsync()
+        {
+            try
+            {
+                var result = await _repository.GetAllStarredAsync();
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        public async Task<IEnumerable<RecordFile>> GetRecentFilesAsync()
+        {
+            try
+            {
+                var result = await _repository.GetRecentFilesAsync();
                 return result;
             }
             catch (Exception e)

@@ -15,7 +15,8 @@ namespace Repository.CQRS.Commands
         Task<bool> DeleteAsync(Guid id);
         Task UpdateAsync(RecordFile item);
         Task AddContext(RecordFile item);
-
+        Task UpdateLastOpenedDate(string id);
+        Task ToggleStarFile(string id);
     }
     public class RecordFileCommand : IRecordFileCommand
     {
@@ -31,11 +32,18 @@ namespace Repository.CQRS.Commands
                                                 TypeId=@{nameof(RecordFile.TypeId)},
                                                 UserId=@{nameof(RecordFile.UserId)},
                                                 Context=@{nameof(RecordFile.Context)},
+                                                Starred=@{nameof(RecordFile.Starred)},
+                                                LastOpenedDate= GetDate() ,
                                                 CreatedDate= GetDate() 
                                                 WHERE Id=@Id";
 
-        private readonly string _addContextSql = $@"UPDATE dbo.RecordFiles SET Context=@{nameof(RecordFile.Context)} WHERE Id=@id ";
+        private readonly string _addContextSql = $@"UPDATE dbo.RecordFiles SET Context=@{nameof(RecordFile.Context)},
+                                                    LastOpenedDate= GetDate() ,
+                                                    WHERE Id=@id ";
+        private readonly string _starFileSql = $@"UPDATE dbo.RecordFiles SET Starred=~(Select Starred From RecordFiles Where Id=@id)  WHERE Id=@id";
 
+        private readonly string _updateLastOpenedDate = $@"UPDATE dbo.RecordFiles SET LastOpenedDate= GetDate() 
+                                                           WHERE Id=@id ";
 
         private readonly string _deleteSql = $@"UPDATE dbo.RecordFiles SET DeleteStatus = 1 WHERE Id=@id ";
 
@@ -79,6 +87,38 @@ namespace Repository.CQRS.Commands
             {
                 await _unitOfWork.GetConnection()
                     .QueryAsync(_addContextSql, item, _unitOfWork.GetTransaction());
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+        public async Task ToggleStarFile(string id)
+        {
+            try
+            {
+                var parameters = new
+                {
+                    id
+                };
+                await _unitOfWork.GetConnection()
+                    .QueryAsync(_starFileSql, parameters, _unitOfWork.GetTransaction());
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+        public async Task UpdateLastOpenedDate(string id)
+        {
+            try
+            {
+                var parameters = new
+                {
+                    id
+                };
+                await _unitOfWork.GetConnection()
+                    .QueryAsync(_updateLastOpenedDate, parameters, _unitOfWork.GetTransaction());
             }
             catch (Exception e)
             {

@@ -15,6 +15,10 @@ namespace Repository.CQRS.Queries
         Task<IEnumerable<RecordFile>> GetAllAsync();
         Task<IEnumerable<RecordFile>> GoBackGetChildren(string id);
 
+        Task<IEnumerable<RecordFile>> GetAllStarredAsync();
+
+        Task<IEnumerable<RecordFile>> GetRecentFilesAsync();
+
     }
 
     public class RecordFileQuery : IRecordFileQuery
@@ -25,12 +29,18 @@ namespace Repository.CQRS.Queries
         private readonly string _getAllSql = @"SELECT C.*, T.Type  from dbo.RecordFiles C 
                                                Left JOIN FileTypes  T ON T.Id=C.TypeId  
                                                WHERE C.DeleteStatus = 0";
+        private readonly string _getRecentFilesSql = @"SELECT C.*, T.Type  from dbo.RecordFiles C 
+                                               Left JOIN FileTypes  T ON T.Id=C.TypeId  
+                                               WHERE C.DeleteStatus = 0 ORDER BY LastOpenedDate DESC";
+        private readonly string _getAllStarredSql = @"SELECT C.*, T.Type  from dbo.RecordFiles C 
+                                               Left JOIN FileTypes  T ON T.Id=C.TypeId  
+                                               WHERE C.DeleteStatus = 0 AND Starred=1";
 
         private readonly string _getByIdSql = @$"SELECT * FROM dbo.RecordFiles WHERE Id=@id";
 
         private readonly string _goBackGetChildrenSql = @$"SELECT * FROM RecordFiles 
-                                                           WHERE ParentId=(SELECT TOP 1 ParentId FROM RecordFiles 
-                                                           WHERE Id=@id) AND DeleteStatus=0";
+                                                           WHERE ParentId=(SELECT TOP 1 ParentId FROM RecordFiles WHERE Id=@id) 
+                                                           AND DeleteStatus=0";
 
 
         public RecordFileQuery(IUnitOfWork unitOfWork)
@@ -44,6 +54,20 @@ namespace Repository.CQRS.Queries
             {
                 var result = await _unitOfWork.GetConnection()
                     .QueryAsync<RecordFile>(_getAllSql, null, _unitOfWork.GetTransaction());
+                return result.ToList();
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        public async Task<IEnumerable<RecordFile>> GetAllStarredAsync()
+        {
+            try
+            {
+                var result = await _unitOfWork.GetConnection()
+                    .QueryAsync<RecordFile>(_getAllStarredSql, null, _unitOfWork.GetTransaction());
                 return result.ToList();
             }
             catch (Exception e)
@@ -68,6 +92,20 @@ namespace Repository.CQRS.Queries
             catch (Exception e)
             {
                 throw;
+            }
+        }
+
+        public async Task<IEnumerable<RecordFile>> GetRecentFilesAsync()
+        {
+            try
+            {
+                var result = await _unitOfWork.GetConnection()
+                    .QueryAsync<RecordFile>(_getRecentFilesSql, null, _unitOfWork.GetTransaction());
+                return result.ToList();
+            }
+            catch (Exception e)
+            {
+                throw e;
             }
         }
 

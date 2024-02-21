@@ -15,12 +15,16 @@ namespace Repository.Repositories
         public Task<RecordFile> GetById(string id);
         Task<IEnumerable<RecordFile>> GetAllAsync();
         Task<IEnumerable<RecordFile>> GoBackGetChildren(string id);
+        Task<IEnumerable<RecordFile>> GetAllStarredAsync();
 
+        Task<IEnumerable<RecordFile>> GetRecentFilesAsync();
         public Task<Guid> AddAsync(RecordFile item);
         Task<bool> DeleteAsync(Guid id);
         Task UpdateAsync(RecordFile item);
         Task AddContext(RecordFile item);
 
+        Task UpdateLastOpenedDate(string id);
+        Task ToggleStarFile(string id);
     }
     public class RecordFileRepository : IRecordFileRepository
     {
@@ -68,6 +72,26 @@ namespace Repository.Repositories
         public async Task<IEnumerable<RecordFile>> GoBackGetChildren(string id)
         {
             return await _query.GoBackGetChildren(id);
+        }
+
+        public async Task UpdateLastOpenedDate(string id)
+        {
+            await _command.UpdateLastOpenedDate(id);
+        }
+
+        public async Task ToggleStarFile(string id)
+        {
+            await _command.ToggleStarFile(id);  
+        }
+
+        public async Task<IEnumerable<RecordFile>> GetAllStarredAsync()
+        {
+            return await _query.GetAllStarredAsync();
+        }
+
+        public async Task<IEnumerable<RecordFile>> GetRecentFilesAsync()
+        {
+            return await _query.GetRecentFilesAsync();
         }
     }
 }

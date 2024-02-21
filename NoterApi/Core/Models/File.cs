@@ -18,8 +18,11 @@ namespace Core.Models
         public long? UserId { get; set; }
         public string? Context { get; set; }
 
+        public bool Starred { get; set; }
 
         public DateTime? CreatedDate { get; set; }
+        public DateTime? LastOpenedDate { get; set; }
+
 
         public bool? DeleteStatus { get; set; }
 
