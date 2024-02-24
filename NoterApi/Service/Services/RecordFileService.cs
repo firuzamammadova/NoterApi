@@ -19,6 +19,7 @@ namespace Service.Services
         Task<IEnumerable<RecordFile>> GetChildrenOfFolder(Guid parentId);
         Task<IEnumerable<RecordFile>> GoBackGetChildren(string id);
         Task<IEnumerable<RecordFile>> GetAllStarredAsync();
+        Task<IEnumerable<RecordFile>> SearchFiles(string key);
 
         Task<IEnumerable<RecordFile>> GetRecentFilesAsync();
 
@@ -215,6 +216,19 @@ namespace Service.Services
             try
             {
                 var result = await _repository.GetRecentFilesAsync();
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        public async Task<IEnumerable<RecordFile>> SearchFiles(string key)
+        {
+            try
+            {
+                var result = await _repository.SearchFiles(key);
                 return result;
             }
             catch (Exception e)

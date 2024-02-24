@@ -14,6 +14,8 @@ namespace Repository.CQRS.Queries
         public Task<RecordFile> GetById(string id);
         Task<IEnumerable<RecordFile>> GetAllAsync();
         Task<IEnumerable<RecordFile>> GoBackGetChildren(string id);
+        Task<IEnumerable<RecordFile>> SearchFiles(string key);
+
 
         Task<IEnumerable<RecordFile>> GetAllStarredAsync();
 
@@ -42,7 +44,12 @@ namespace Repository.CQRS.Queries
                                                            WHERE ParentId=(SELECT TOP 1 ParentId FROM RecordFiles WHERE Id=@id) 
                                                            AND DeleteStatus=0";
 
-
+        private readonly string _searchFilesSql = $@"DECLARE @SearchText NVARCHAR(MAX)
+                                                     SET @SearchText = N'%' + @SEARCH + '%'
+                                                     SELECT C.*, T.Type  from dbo.RecordFiles C 
+                                                     Left JOIN FileTypes  T ON T.Id=C.TypeId 
+                                                     WHERE C.DeleteStatus = 0 AND 
+                                                     (C.Name LIKE @SearchText OR C.Context LIKE @SearchText)";
         public RecordFileQuery(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
@@ -119,6 +126,24 @@ namespace Repository.CQRS.Queries
                 };
                 var result = await _unitOfWork.GetConnection()
                     .QueryAsync<RecordFile>(_goBackGetChildrenSql, parameters, _unitOfWork.GetTransaction());
+                return result.ToList();
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        public async Task<IEnumerable<RecordFile>> SearchFiles(string key)
+        {
+            try
+            {
+                var parameters = new
+                {
+                    search=key
+                };
+                var result = await _unitOfWork.GetConnection()
+                    .QueryAsync<RecordFile>(_searchFilesSql, parameters, _unitOfWork.GetTransaction());
                 return result.ToList();
             }
             catch (Exception e)

@@ -16,6 +16,7 @@ namespace Repository.Repositories
         Task<IEnumerable<RecordFile>> GetAllAsync();
         Task<IEnumerable<RecordFile>> GoBackGetChildren(string id);
         Task<IEnumerable<RecordFile>> GetAllStarredAsync();
+        Task<IEnumerable<RecordFile>> SearchFiles(string key);
 
         Task<IEnumerable<RecordFile>> GetRecentFilesAsync();
         public Task<Guid> AddAsync(RecordFile item);
@@ -92,6 +93,11 @@ namespace Repository.Repositories
         public async Task<IEnumerable<RecordFile>> GetRecentFilesAsync()
         {
             return await _query.GetRecentFilesAsync();
+        }
+
+        public async Task<IEnumerable<RecordFile>> SearchFiles(string key)
+        {
+            return await _query.SearchFiles(key);
         }
     }
 }

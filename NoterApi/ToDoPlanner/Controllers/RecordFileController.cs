@@ -121,7 +121,13 @@ namespace NoterApi.Controllers
             await _service.DeleteAsync(new Guid(id));
             return Ok(); ;
         }
-
+        [HttpGet]
+        [Route("[action]")]
+        public async Task<IActionResult> SearchAsync([FromQuery] string key)
+        {
+           var result= await _service.SearchFiles(key);
+            return Ok(result); ;
+        }
         [HttpPut]
         [Route("[action]")]
         public async Task<IActionResult> UpdateAsync([FromBody] RecordFile item)
