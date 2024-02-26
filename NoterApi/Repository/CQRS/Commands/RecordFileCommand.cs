@@ -38,7 +38,7 @@ namespace Repository.CQRS.Commands
                                                 WHERE Id=@Id";
 
         private readonly string _addContextSql = $@"UPDATE dbo.RecordFiles SET Context=@{nameof(RecordFile.Context)},
-                                                    LastOpenedDate= GetDate() ,
+                                                    LastOpenedDate= GetDate() 
                                                     WHERE Id=@id ";
         private readonly string _starFileSql = $@"UPDATE dbo.RecordFiles SET Starred=~(Select Starred From RecordFiles Where Id=@id)  WHERE Id=@id";
 

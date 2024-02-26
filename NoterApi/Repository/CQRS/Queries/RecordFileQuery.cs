@@ -33,7 +33,7 @@ namespace Repository.CQRS.Queries
                                                WHERE C.DeleteStatus = 0";
         private readonly string _getRecentFilesSql = @"SELECT C.*, T.Type  from dbo.RecordFiles C 
                                                Left JOIN FileTypes  T ON T.Id=C.TypeId  
-                                               WHERE C.DeleteStatus = 0 ORDER BY LastOpenedDate DESC";
+                                               WHERE C.DeleteStatus = 0 AND T.Type=1 ORDER BY LastOpenedDate DESC";
         private readonly string _getAllStarredSql = @"SELECT C.*, T.Type  from dbo.RecordFiles C 
                                                Left JOIN FileTypes  T ON T.Id=C.TypeId  
                                                WHERE C.DeleteStatus = 0 AND Starred=1";
