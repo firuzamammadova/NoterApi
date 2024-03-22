@@ -1,4 +1,5 @@
 ﻿using Core.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Service.Services;
@@ -7,6 +8,7 @@ namespace NoterApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class RecordFileController : ControllerBase
     {
         private readonly IRecordFileService _service;
@@ -20,7 +22,7 @@ namespace NoterApi.Controllers
         [Route("[action]")]
         public async Task<IActionResult> GetById(string id)
         {
-
+            
             var result = await _service.GetById(id);
             return Ok(result);
         }

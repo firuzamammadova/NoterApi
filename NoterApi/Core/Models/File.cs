@@ -15,7 +15,7 @@ namespace Core.Models
         public bool IsParent { get; set; }
         public Guid? ParentId { get; set; }
         public Guid? TypeId { get; set; }
-        public long? UserId { get; set; }
+        public Guid? UserId { get; set; }
         public string? Context { get; set; }
 
         public bool Starred { get; set; }
