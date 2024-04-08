@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Repository.Identity;
 using Microsoft.Extensions.Configuration;
 using Repository.Infrastructure;
+using Google.Apis.Auth;
 
 namespace Service.Services
 {
@@ -22,6 +23,7 @@ namespace Service.Services
         Task<IdentityResult> ResetPasswordWithoutOldPasswordAsync(string userid, string newPassword);
         Task ValidateUser(string userId);
         Task<long> DeleteUser(long id);
+        Task<GoogleJsonWebSignature.Payload> VerifyToken(string token);
     }
 
 
@@ -43,6 +45,22 @@ namespace Service.Services
             _unitOfWork = unitOfWork;
             _userStore = userStore;
             _configuration = configuration;
+        }
+
+        public async Task<GoogleJsonWebSignature.Payload> VerifyToken(string token)
+        {
+
+            try
+            {
+                GoogleJsonWebSignature.Payload payload = await GoogleJsonWebSignature.ValidateAsync(token);
+                return payload;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
         }
 
         public async Task<bool> CheckPasswordAsync(User user, string password)

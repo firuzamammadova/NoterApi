@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.IdentityModel.Tokens;
 using NoterApi.RequestModels;
 using Services.Service;
+using System.Reflection;
 
 
 namespace NoterApi.Controllers
@@ -27,19 +28,19 @@ namespace NoterApi.Controllers
         private readonly ITokenService _tokenService;
         private readonly JsonSerializerOptions _jsonSerializerSettings;
         private readonly UserManager<User> _userManager;
-       // private readonly RoleManager<ApplicationRole> _roleManager;
+        // private readonly RoleManager<ApplicationRole> _roleManager;
         //private readonly IEmailService _emailService;
         //private readonly IStaffService _staffService;
 
         public AccountController(IConfiguration configuration, IUserService userService,
-            ITokenService tokenService, 
+            ITokenService tokenService,
             //IEmailService emailService,
             UserManager<User> userManager
             //,IStaffService staffService, RoleManager<ApplicationRole> roleManager
             )
         {
             _userService = userService;
-          //  _tokenService = tokenService;
+            //  _tokenService = tokenService;
 
             _configuration = configuration;
             _jsonSerializerSettings = new JsonSerializerOptions
@@ -76,11 +77,11 @@ namespace NoterApi.Controllers
                 Surname = model.Surname,
                 GenderIdentity = model.GenderIdentity,
                 SecurityStamp = Guid.NewGuid().ToString(),
-                UserName = model.UserName,
+                UserName = model.Email.Split('@')[0],
                 Email = model.Email,
                 EmailConfirmed = true,
                 LockoutEnabled = false,
-                PhoneNumber = model?.PhoneNumber,
+              //  PhoneNumber = model?.PhoneNumber,
                 BirthDate = model.BirthDate
             };
 
@@ -109,7 +110,7 @@ namespace NoterApi.Controllers
             }
 
 
-           // await _userService.AddToRoleAsync(user, "RegisteredUser");
+            // await _userService.AddToRoleAsync(user, "RegisteredUser");
 
             return Json(JsonSerializer.Serialize(data));
 
@@ -224,12 +225,67 @@ namespace NoterApi.Controllers
             return Ok();
         }
 
-        //[HttpPost("BlockUser")]
-        //public async Task<IActionResult> BlockUser([FromQuery] string userId, [FromQuery] bool status)
-        //{
-        //    await _staffService.BlockUser(userId, status);
-        //    return Ok();
-        //}
+        [HttpGet("AuthWithGoogle")]
+        public async Task<IActionResult> AuthWithGoogle()
+        {
+            string token = Request.Headers["Authorization"].ToString().Remove(0, 7); //remove Bearer 
+
+
+
+            var data = await _userService.VerifyToken(token);
+            if (data == null)
+            {
+                return BadRequest("Invalid token");
+            }
+
+            var user = await _userService.FindByEmailAsync(data.Email);
+
+            if (user == null)
+            {
+                try
+                {
+                    user = new User()
+                    {
+                        Name = data.GivenName,
+                        Surname = data.FamilyName,
+                        SecurityStamp = Guid.NewGuid().ToString(),
+                        UserName = data.Email.Split('@')[0],
+                        Email = data.Email,
+                        EmailConfirmed = true,
+                        LockoutEnabled = false,
+                        BirthDate = DateTime.Now
+                    };
+                    var result = await _userService.CreateAsync(user, data.Subject);
+
+                }
+                catch (Exception e)
+                {
+
+                    return StatusCode(500, e);
+                }
+            }
+
+
+
+
+            try
+            {
+
+                var refreshToken = CreateRefreshToken("string", user.Id.ToString(), data.Email);
+
+
+                var jwttoken = CreateAccessToken(user, refreshToken.Value);
+                return Json(jwttoken);
+
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e);
+            }
+
+
+            return Ok();
+        }
 
         private UserToken CreateRefreshToken(string clientId, string userId, string name)
         {
@@ -259,7 +315,7 @@ namespace NoterApi.Controllers
                 // TODO: add additional claims here
             };
 
-           // var roles = _userService.GetRolesAsync(user).Result;
+            // var roles = _userService.GetRolesAsync(user).Result;
 
             //if (roles != null && roles.Count > 0)
             //{
@@ -365,7 +421,7 @@ namespace NoterApi.Controllers
             return Ok(res);
         }
 
-    
+
 
         [HttpDelete]
         public async Task<IActionResult> DeleteAsync([FromQuery] long id)

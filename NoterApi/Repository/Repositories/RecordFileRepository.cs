@@ -13,12 +13,12 @@ namespace Repository.Repositories
     public interface IRecordFileRepository
     {
         public Task<RecordFile> GetById(string id);
-        Task<IEnumerable<RecordFile>> GetAllAsync();
-        Task<IEnumerable<RecordFile>> GoBackGetChildren(string id);
-        Task<IEnumerable<RecordFile>> GetAllStarredAsync();
-        Task<IEnumerable<RecordFile>> SearchFiles(string key);
+        Task<IEnumerable<RecordFile>> GetAllAsync(string userId);
+        Task<IEnumerable<RecordFile>> GoBackGetChildren(string id, string userId);
+        Task<IEnumerable<RecordFile>> GetAllStarredAsync(string userId);
+        Task<IEnumerable<RecordFile>> SearchFiles(string key, string userId);
 
-        Task<IEnumerable<RecordFile>> GetRecentFilesAsync();
+        Task<IEnumerable<RecordFile>> GetRecentFilesAsync(string userId);
         public Task<Guid> AddAsync(RecordFile item);
         Task<bool> DeleteAsync(Guid id);
         Task UpdateAsync(RecordFile item);
@@ -48,9 +48,9 @@ namespace Repository.Repositories
             return await _command.AddAsync(item);
         }
 
-        public async Task<IEnumerable<RecordFile>> GetAllAsync()
+        public async Task<IEnumerable<RecordFile>> GetAllAsync(string userId)
         {
-            return await _query.GetAllAsync();
+            return await _query.GetAllAsync( userId);
         }
 
         public async Task<bool> DeleteAsync(Guid id)
@@ -70,9 +70,9 @@ namespace Repository.Repositories
             return;
         }
 
-        public async Task<IEnumerable<RecordFile>> GoBackGetChildren(string id)
+        public async Task<IEnumerable<RecordFile>> GoBackGetChildren(string id, string userId)
         {
-            return await _query.GoBackGetChildren(id);
+            return await _query.GoBackGetChildren(id,userId);
         }
 
         public async Task UpdateLastOpenedDate(string id)
@@ -85,19 +85,19 @@ namespace Repository.Repositories
             await _command.ToggleStarFile(id);  
         }
 
-        public async Task<IEnumerable<RecordFile>> GetAllStarredAsync()
+        public async Task<IEnumerable<RecordFile>> GetAllStarredAsync(string userId)
         {
-            return await _query.GetAllStarredAsync();
+            return await _query.GetAllStarredAsync(userId);
         }
 
-        public async Task<IEnumerable<RecordFile>> GetRecentFilesAsync()
+        public async Task<IEnumerable<RecordFile>> GetRecentFilesAsync(string userId)
         {
-            return await _query.GetRecentFilesAsync();
+            return await _query.GetRecentFilesAsync(userId);
         }
 
-        public async Task<IEnumerable<RecordFile>> SearchFiles(string key)
+        public async Task<IEnumerable<RecordFile>> SearchFiles(string key, string userId)
         {
-            return await _query.SearchFiles(key);
+            return await _query.SearchFiles(key,userId);
         }
     }
 }

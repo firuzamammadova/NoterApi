@@ -1,10 +1,14 @@
 ﻿using Core.Models;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNetCore.Http;
 using Microsoft.VisualBasic.FileIO;
 using Repository.Infrastructure;
 using Repository.Repositories;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -39,12 +43,14 @@ namespace Service.Services
 
         private readonly IRecordFileRepository _repository;
         private readonly IUnitOfWork _unitOfWork;
+        private IHttpContextAccessor _httpContextAccessor;
 
-        public RecordFileService(IFileTypeRepository typeRepository, IRecordFileRepository repository, IUnitOfWork unitOfWork)
+        public RecordFileService(IFileTypeRepository typeRepository, IRecordFileRepository repository, IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor)
         {
             _typeRepository = typeRepository;
             _repository = repository;
             _unitOfWork = unitOfWork;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<Guid> AddAsync(RecordFile recordFile)
@@ -55,6 +61,8 @@ namespace Service.Services
             {
                 var typeId = await _typeRepository.GetIdByType(recordFile.Type);
                 recordFile.TypeId = typeId;
+                var userId = getUserId();
+                recordFile.UserId = new Guid(userId);
                 var result = await _repository.AddAsync(recordFile);
                 _unitOfWork.SaveChanges();
                 return result;
@@ -81,12 +89,19 @@ namespace Service.Services
                 throw e;
             }
         }
+        private string? getUserId()
+        {
+            var user = _httpContextAccessor.HttpContext?.User;
 
+            var userId = user?.Identity.GetUserId();
+            return userId;
+        }
         public async Task<IEnumerable<RecordFile>> GetAllAsync()
         {
             try
             {
-                var result = await _repository.GetAllAsync();
+                var id = getUserId();
+                var result = await _repository.GetAllAsync(id);
                 return result;
             }
             catch (Exception e)
@@ -98,7 +113,9 @@ namespace Service.Services
         {
             try
             {
-                var result = await _repository.GetAllAsync();
+                var userId = getUserId();
+
+                var result = await _repository.GetAllAsync(userId);
                 var ancestorFolders = result.Where(x => x.Type == FileTypeEnum.Folder && x.ParentId == null);
                 return ancestorFolders;
             }
@@ -111,7 +128,8 @@ namespace Service.Services
         {
             try
             {
-                var result = await _repository.GetAllAsync();
+                var userId = getUserId();
+                var result = await _repository.GetAllAsync(userId);
                 var childrenOfFolder = result.Where(x => x.ParentId == parentId);
                 return childrenOfFolder;
 
@@ -175,10 +193,12 @@ namespace Service.Services
         {
             try
             {
-                var result = await _repository.GoBackGetChildren(id);
+                var userId = getUserId();
+
+                var result = await _repository.GoBackGetChildren(id, userId);
                 if (result.Count() == 0)
                 {
-                   result=await GetAncestorFolders();
+                    result = await GetAncestorFolders();
                 }
                 return result;
             }
@@ -195,14 +215,15 @@ namespace Service.Services
 
         public async Task ToggleStarFile(string id)
         {
-           await _repository.ToggleStarFile(id);
+            await _repository.ToggleStarFile(id);
         }
 
         public async Task<IEnumerable<RecordFile>> GetAllStarredAsync()
         {
             try
             {
-                var result = await _repository.GetAllStarredAsync();
+                var id = getUserId();
+                var result = await _repository.GetAllStarredAsync(id);
                 return result;
             }
             catch (Exception e)
@@ -215,7 +236,9 @@ namespace Service.Services
         {
             try
             {
-                var result = await _repository.GetRecentFilesAsync();
+                var id = getUserId();
+
+                var result = await _repository.GetRecentFilesAsync(id);
                 return result;
             }
             catch (Exception e)
@@ -228,7 +251,9 @@ namespace Service.Services
         {
             try
             {
-                var result = await _repository.SearchFiles(key);
+                var id = getUserId();
+
+                var result = await _repository.SearchFiles(key, id);
                 return result;
             }
             catch (Exception e)

@@ -33,10 +33,10 @@ namespace Repository.CQRS.Queries
                                                WHERE C.DeleteStatus = 0 AND C.UserId=@userId";
         private readonly string _getRecentFilesSql = @"SELECT C.*, T.Type  from dbo.RecordFiles C 
                                                Left JOIN FileTypes  T ON T.Id=C.TypeId  
-                                               WHERE C.DeleteStatus = 0 AND T.Type=1 AND C.UserId=@id ORDER BY LastOpenedDate DESC";
+                                               WHERE C.DeleteStatus = 0 AND T.Type=1 AND C.UserId=@userId ORDER BY LastOpenedDate DESC";
         private readonly string _getAllStarredSql = @"SELECT C.*, T.Type  from dbo.RecordFiles C 
                                                Left JOIN FileTypes  T ON T.Id=C.TypeId  
-                                               WHERE C.DeleteStatus = 0 AND C.Starred=1 AND C.UserId=@id";
+                                               WHERE C.DeleteStatus = 0 AND C.Starred=1 AND C.UserId=@userId";
 
         private readonly string _getByIdSql = @$"SELECT * FROM dbo.RecordFiles WHERE Id=@id";
 
@@ -48,7 +48,7 @@ namespace Repository.CQRS.Queries
                                                      SET @SearchText = N'%' + @SEARCH + '%'
                                                      SELECT C.*, T.Type  from dbo.RecordFiles C 
                                                      Left JOIN FileTypes  T ON T.Id=C.TypeId 
-                                                     WHERE C.DeleteStatus = 0 AND C.UserId=@id AND 
+                                                     WHERE C.DeleteStatus = 0 AND C.UserId=@userId AND 
                                                      (C.Name LIKE @SearchText OR C.Context LIKE @SearchText)";
         public RecordFileQuery(IUnitOfWork unitOfWork)
         {
