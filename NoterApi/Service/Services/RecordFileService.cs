@@ -31,11 +31,11 @@ namespace Service.Services
         Task<bool> DeleteAsync(Guid id);
         Task UpdateAsync(RecordFile item);
         Task AddContext(RecordFile item);
-
+        string? getUserId();
 
         Task UpdateLastOpenedDate(string id);
         Task ToggleStarFile(string id);
-
+       void setIHttpContextAccessor(IHttpContextAccessor httpContextAccessor);
     }
     public class RecordFileService : IRecordFileService
     {
@@ -43,13 +43,17 @@ namespace Service.Services
 
         private readonly IRecordFileRepository _repository;
         private readonly IUnitOfWork _unitOfWork;
-        private IHttpContextAccessor _httpContextAccessor;
+        private  IHttpContextAccessor _httpContextAccessor;
 
         public RecordFileService(IFileTypeRepository typeRepository, IRecordFileRepository repository, IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor)
         {
             _typeRepository = typeRepository;
             _repository = repository;
             _unitOfWork = unitOfWork;
+            _httpContextAccessor = httpContextAccessor;
+        }
+       public void setIHttpContextAccessor(IHttpContextAccessor httpContextAccessor)
+        {
             _httpContextAccessor = httpContextAccessor;
         }
 
@@ -89,7 +93,7 @@ namespace Service.Services
                 throw e;
             }
         }
-        private string? getUserId()
+        public string? getUserId()
         {
             var user = _httpContextAccessor.HttpContext?.User;
 
@@ -116,7 +120,7 @@ namespace Service.Services
                 var userId = getUserId();
 
                 var result = await _repository.GetAllAsync(userId);
-                var ancestorFolders = result.Where(x => x.Type == FileTypeEnum.Folder && x.ParentId == null);
+                var ancestorFolders = result.Where(x =>  x.ParentId == null);
                 return ancestorFolders;
             }
             catch (Exception e)
