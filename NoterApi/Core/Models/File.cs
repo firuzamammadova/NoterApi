@@ -25,6 +25,8 @@ namespace Core.Models
 
 
         public bool? DeleteStatus { get; set; }
+        public int? ChildrenCount { get; set; }
+
 
     }
 }

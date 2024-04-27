@@ -5,14 +5,17 @@ using Repository.Identity;
 using Microsoft.Extensions.Configuration;
 using Repository.Infrastructure;
 using Google.Apis.Auth;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNet.Identity;
+using Service.Models;
 
 namespace Service.Services
 {
     public interface IUserService
     {
-        Task<IdentityResult> CreateAsync(User user, string password);
+        Task<Microsoft.AspNetCore.Identity.IdentityResult> CreateAsync(User user, string password);
         Task<string> ValidatePassword(string password);
-        Task<IdentityResult> AddToRoleAsync(User user, string roleName);
+        Task<Microsoft.AspNetCore.Identity.IdentityResult> AddToRoleAsync(User user, string roleName);
         Task<User> FindByEmailAsync(string email);
         Task<User> FindByNameAsync(string normalizedUserName);
         Task<bool> CheckPasswordAsync(User user, string password);
@@ -20,8 +23,9 @@ namespace Service.Services
         Task<IList<string>> GetRolesAsync(User user);
         Task<string> GetConfirmationCode(string email, string userId);
         Task<bool> CheckConfirmationCode(string userId, string confirmationCode);
-        Task<IdentityResult> ResetPasswordWithoutOldPasswordAsync(string userid, string newPassword);
+        Task<Microsoft.AspNetCore.Identity.IdentityResult> ResetPasswordWithoutOldPasswordAsync(string userid, string newPassword);
         Task ValidateUser(string userId);
+        Task<UserInfo> GetUser();
         Task<long> DeleteUser(long id);
         Task<GoogleJsonWebSignature.Payload> VerifyToken(string token);
     }
@@ -31,20 +35,22 @@ namespace Service.Services
     {
         private readonly UserManager _userManager;
         private readonly SignInManager<User> _signInManager;
-        private readonly IUserStore<User> _userStore;
+        private readonly Microsoft.AspNetCore.Identity.IUserStore<User> _userStore;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IConfiguration _configuration;
+        private IHttpContextAccessor _httpContextAccessor;
 
 
         public UserService(UserManager userManager, SignInManager<User> signInManager,
-             IConfiguration configuration, IUnitOfWork unitOfWork, IUserStore<User> userStore
-            )
+             IConfiguration configuration, IUnitOfWork unitOfWork, Microsoft.AspNetCore.Identity.IUserStore<User> userStore
+, IHttpContextAccessor httpContextAccessor)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _unitOfWork = unitOfWork;
             _userStore = userStore;
             _configuration = configuration;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<GoogleJsonWebSignature.Payload> VerifyToken(string token)
@@ -62,13 +68,36 @@ namespace Service.Services
             }
 
         }
+        public async Task<UserInfo> GetUser()
+        {
+
+            try
+            {
+                UserInfo userInfo = null ;
+               var identityUser = _httpContextAccessor.HttpContext?.User;
+
+                var userId = identityUser?.Identity.GetUserId();
+                var user = await FindByIdAsync(userId);
+                if (user != null)
+                {
+                     userInfo=new UserInfo() { Email = user.Email, FullName = user.Name + " " + user.Surname };
+                }
+                return userInfo;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+        }
 
         public async Task<bool> CheckPasswordAsync(User user, string password)
         {
             return await _userManager.CheckPasswordAsync(user, password);
         }
 
-        public async Task<IdentityResult> CreateAsync(User user, string password)
+        public async Task<Microsoft.AspNetCore.Identity.IdentityResult> CreateAsync(User user, string password)
         {
             try
             {
@@ -90,7 +119,7 @@ namespace Service.Services
             return result;
         }
 
-        public async Task<IdentityResult> AddToRoleAsync(User user, string roleName)
+        public async Task<Microsoft.AspNetCore.Identity.IdentityResult> AddToRoleAsync(User user, string roleName)
         {
             var result = await _userManager.AddToRoleAsync(user, roleName);
             return result;
@@ -145,7 +174,7 @@ namespace Service.Services
             return res;
         }
 
-        public async Task<IdentityResult> ResetPasswordWithoutOldPasswordAsync(string userId, string newPassword)
+        public async Task<Microsoft.AspNetCore.Identity.IdentityResult> ResetPasswordWithoutOldPasswordAsync(string userId, string newPassword)
         {
             var user = await _userManager.FindByIdAsync(userId);
 

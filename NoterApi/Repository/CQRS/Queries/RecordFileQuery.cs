@@ -21,6 +21,9 @@ namespace Repository.CQRS.Queries
 
         Task<IEnumerable<RecordFile>> GetRecentFilesAsync(string userId);
 
+        Task<int> GetCountsOfChildren(string id);
+
+
     }
 
     public class RecordFileQuery : IRecordFileQuery
@@ -28,25 +31,34 @@ namespace Repository.CQRS.Queries
 
         private readonly IUnitOfWork _unitOfWork;
 
-        private readonly string _getAllSql = @"SELECT C.*, T.Type  from dbo.RecordFiles C 
+        private readonly string _getAllSql = @"SELECT C.*, T.Type ,(Select Count(D.Id) FROM RecordFiles D WHERE D.ParentId=C.Id) 
+                                               AS ChildrenCount  from dbo.RecordFiles C 
                                                Left JOIN FileTypes  T ON T.Id=C.TypeId  
                                                WHERE C.DeleteStatus = 0 AND C.UserId=@userId";
-        private readonly string _getRecentFilesSql = @"SELECT C.*, T.Type  from dbo.RecordFiles C 
+        private readonly string _getRecentFilesSql = @"SELECT C.*, T.Type ,(Select Count(D.Id) FROM RecordFiles D WHERE D.ParentId=C.Id) 
+                                               AS ChildrenCount from dbo.RecordFiles C 
                                                Left JOIN FileTypes  T ON T.Id=C.TypeId  
                                                WHERE C.DeleteStatus = 0 AND T.Type=1 AND C.UserId=@userId ORDER BY LastOpenedDate DESC";
-        private readonly string _getAllStarredSql = @"SELECT C.*, T.Type  from dbo.RecordFiles C 
+        private readonly string _getAllStarredSql = @"SELECT C.*, T.Type ,(Select Count(D.Id) FROM RecordFiles D WHERE D.ParentId=C.Id) 
+                                               AS ChildrenCount  from dbo.RecordFiles C 
                                                Left JOIN FileTypes  T ON T.Id=C.TypeId  
                                                WHERE C.DeleteStatus = 0 AND C.Starred=1 AND C.UserId=@userId";
 
         private readonly string _getByIdSql = @$"SELECT * FROM dbo.RecordFiles WHERE Id=@id";
 
-        private readonly string _goBackGetChildrenSql = @$"SELECT * FROM RecordFiles 
-                                                           WHERE ParentId=(SELECT TOP 1 ParentId FROM RecordFiles WHERE Id=@id) 
-                                                           AND DeleteStatus=0 AND UserId=@userId";
+        private readonly string _getCountsOfChildrenSql = @$"SELECT COUNT(Id) FROM RecordFiles WHERE ParentId=@id";
+
+
+        private readonly string _goBackGetChildrenSql = @$"SELECT C.*,T.Type,(Select Count(D.Id) FROM RecordFiles D WHERE D.ParentId=C.Id) 
+                                                           AS ChildrenCount FROM RecordFiles C
+                                                           Left JOIN FileTypes  T ON T.Id=C.TypeId  
+                                                           WHERE C.ParentId=(SELECT TOP 1 ParentId FROM RecordFiles WHERE Id=@id) 
+                                                           AND C.DeleteStatus=0 AND C.UserId=@userId";
 
         private readonly string _searchFilesSql = $@"DECLARE @SearchText NVARCHAR(MAX)
                                                      SET @SearchText = N'%' + @SEARCH + '%'
-                                                     SELECT C.*, T.Type  from dbo.RecordFiles C 
+                                                     SELECT C.*, T.Type ,(Select Count(D.Id) FROM RecordFiles D WHERE D.ParentId=C.Id) 
+                                                     AS ChildrenCount from dbo.RecordFiles C 
                                                      Left JOIN FileTypes  T ON T.Id=C.TypeId 
                                                      WHERE C.DeleteStatus = 0 AND C.UserId=@userId AND 
                                                      (C.Name LIKE @SearchText OR C.Context LIKE @SearchText)";
@@ -110,6 +122,26 @@ namespace Repository.CQRS.Queries
             }
         }
 
+        public async Task<int> GetCountsOfChildren(string id)
+        {
+            try
+            {
+                var parameters = new
+                {
+                    id
+                };
+                var result = await _unitOfWork.GetConnection()
+                    .QueryFirstOrDefaultAsync<int>(_getCountsOfChildrenSql, parameters, _unitOfWork.GetTransaction());
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
+        }
+
+
         public async Task<IEnumerable<RecordFile>> GetRecentFilesAsync(string userId)
         {
             try
@@ -128,14 +160,14 @@ namespace Repository.CQRS.Queries
             }
         }
 
-        public async Task<IEnumerable<RecordFile>> GoBackGetChildren(string id,string userId)
+        public async Task<IEnumerable<RecordFile>> GoBackGetChildren(string id, string userId)
         {
             try
             {
                 var parameters = new
                 {
-                    id=id,
-                    userId=userId
+                    id = id,
+                    userId = userId
                 };
                 var result = await _unitOfWork.GetConnection()
                     .QueryAsync<RecordFile>(_goBackGetChildrenSql, parameters, _unitOfWork.GetTransaction());
@@ -153,8 +185,8 @@ namespace Repository.CQRS.Queries
             {
                 var parameters = new
                 {
-                    search=key,
-                    userId=userId
+                    search = key,
+                    userId = userId
                 };
                 var result = await _unitOfWork.GetConnection()
                     .QueryAsync<RecordFile>(_searchFilesSql, parameters, _unitOfWork.GetTransaction());

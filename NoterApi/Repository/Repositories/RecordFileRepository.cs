@@ -26,6 +26,8 @@ namespace Repository.Repositories
 
         Task UpdateLastOpenedDate(string id);
         Task ToggleStarFile(string id);
+        Task<int> GetCountsOfChildren(string id);
+
     }
     public class RecordFileRepository : IRecordFileRepository
     {
@@ -98,6 +100,11 @@ namespace Repository.Repositories
         public async Task<IEnumerable<RecordFile>> SearchFiles(string key, string userId)
         {
             return await _query.SearchFiles(key,userId);
+        }
+
+        public async Task<int> GetCountsOfChildren(string id)
+        {
+            return await _query.GetCountsOfChildren(id);
         }
     }
 }

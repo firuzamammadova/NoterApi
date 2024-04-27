@@ -81,7 +81,7 @@ namespace NoterApi.Controllers
                 Email = model.Email,
                 EmailConfirmed = true,
                 LockoutEnabled = false,
-              //  PhoneNumber = model?.PhoneNumber,
+                //  PhoneNumber = model?.PhoneNumber,
                 BirthDate = model.BirthDate
             };
 
@@ -219,7 +219,9 @@ namespace NoterApi.Controllers
                 return new UnauthorizedResult();
             }
         }
-        private async Task<IActionResult> SignOut()
+      
+        [HttpGet("Signout")]
+        public async Task<IActionResult> SignOut()
         {
             await HttpContext.SignOutAsync();
             return Ok();
@@ -411,6 +413,28 @@ namespace NoterApi.Controllers
         //        return Ok("user_not_found");
         //    }
         //}
+
+        [HttpGet("GetUser")]
+        public async Task<IActionResult> GetUser()
+        {
+
+            {
+                try
+                {
+                    var userInfo = await _userService.GetUser();
+                    return Ok(userInfo);
+
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(203, ex.Message);
+                    throw;
+                }
+
+
+            }
+        }
+
         [HttpPost("CheckConfirmationCode")]
         public async Task<IActionResult> CheckConfirmationCode([FromQuery] string confirmationCode, [FromQuery] string email)
         {

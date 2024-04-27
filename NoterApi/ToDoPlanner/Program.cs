@@ -133,7 +133,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Pharmacy_API", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Noter_API", Version = "v1" });
 
     var securitySchema = new OpenApiSecurityScheme
     {
