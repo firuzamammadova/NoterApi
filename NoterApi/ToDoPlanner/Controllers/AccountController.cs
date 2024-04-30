@@ -16,6 +16,9 @@ using Microsoft.IdentityModel.Tokens;
 using NoterApi.RequestModels;
 using Services.Service;
 using System.Reflection;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using Microsoft.AspNetCore.Authorization;
+using Object = System.Object;
 
 
 namespace NoterApi.Controllers
@@ -113,6 +116,47 @@ namespace NoterApi.Controllers
             // await _userService.AddToRoleAsync(user, "RegisteredUser");
 
             return Json(JsonSerializer.Serialize(data));
+
+        }
+        [Authorize]
+        [HttpPost("ChangePassword")]
+
+        public async Task<IActionResult> ChangePassword(ChangePasswordRequestModel model)
+        {
+            var userInfo = await _userService.GetUser();
+            if (userInfo == null) return BadRequest();
+            var user = await
+                        _userService.FindByEmailAsync(userInfo.Email);
+            if (user == null) return BadRequest();
+            var hasPassword = await _userService.CheckPasswordAsync(user,
+                      model.CurrentPassword);
+            if (!hasPassword) return StatusCode(401, "not_data");
+
+            var passwordErros = await _userService.ValidatePassword(model.NewPassword);
+
+            if (passwordErros != null)
+            {
+                return BadRequest(passwordErros);
+            }
+            try
+            {
+
+                var result = await _userService.ChangePassword(user, model.CurrentPassword, model.NewPassword);
+                var errors = result.Errors;
+
+                if (errors.ToList().FirstOrDefault() != null)
+                {
+                    return StatusCode(208, result);
+                }
+                return Ok(result);
+
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e);
+
+                throw;
+            }
 
         }
         [HttpPost("Auth")]
@@ -219,7 +263,7 @@ namespace NoterApi.Controllers
                 return new UnauthorizedResult();
             }
         }
-      
+
         [HttpGet("Signout")]
         public async Task<IActionResult> SignOut()
         {

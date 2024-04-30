@@ -28,6 +28,7 @@ namespace Service.Services
         Task<UserInfo> GetUser();
         Task<long> DeleteUser(long id);
         Task<GoogleJsonWebSignature.Payload> VerifyToken(string token);
+        Task<Microsoft.AspNetCore.Identity.IdentityResult> ChangePassword(User user, string password, string newPassword);
     }
 
 
@@ -102,6 +103,21 @@ namespace Service.Services
             try
             {
                 var result = await _userManager.CreateAsync(user, password);
+                return result;
+
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
+        }
+        public async Task<Microsoft.AspNetCore.Identity.IdentityResult> ChangePassword(User user, string password,string newPassword)
+        {
+            try
+            {
+                var result = await _userManager.ChangePasswordAsync(user, password,newPassword);
                 return result;
 
             }
